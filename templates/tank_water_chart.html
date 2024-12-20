@@ -1,0 +1,134 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank Water Chart</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .button-container {
+            display: flex;
+            justify-content: center; /* Centers horizontally */
+            align-items: center; /* Centers vertically */
+            margin: 20px 0; /* Spacing above and below */
+        }
+
+        .home_button, .refill-button {
+            display: inline-block;
+            text-decoration: none; /* Removes underline */
+            background-color: #4CAF50; /* Button color */
+            color: white; /* Text color */
+            font-size: 18px; /* Font size */
+            font-weight: bold; /* Bold text */
+            padding: 12px 24px; /* Padding around the text */
+            border: 2px solid white; /* Border matches the button color */
+            border-radius: 8px; /* Rounded corners */
+            transition: all 0.3s ease; /* Smooth transition for hover effects */
+            cursor: pointer; /* Pointer on hover */
+            text-align: center;
+            margin: 10px; /* Add spacing between buttons */
+        }
+
+        .home_button:hover, .refill-button:hover {
+            background-color: white; /* Changes background to white */
+            color: #4CAF50; /* Changes text color to green */
+            border-color: #000000; /* Keeps the border green */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds a shadow effect */
+            transform: scale(1.1); /* Slightly enlarges the button */
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        body {
+            background-image: url("{% static 'images/background.jpg' %}");
+            background-size: cover; /* Ensures the image covers the entire page */
+            background-repeat: no-repeat; /* Prevents tiling */
+            background-attachment: fixed; /* Keeps the background fixed during scrolling */
+            background-position: center; /* Centers the image */
+            color: #040000d1; /* Optional: Makes text white for better contrast */
+        }
+
+        canvas {
+            background-color: white; /* Ensure the chart background is white */
+            border-radius: 8px; /* Optional: Add rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for better separation */
+            width: 50% !important; /* Set width to 50% of the container */
+            height: auto; /* Adjust height automatically to maintain aspect ratio */
+            margin: 0 auto; /* Center the chart */
+            display: block; /* Ensure proper centering when margin auto is applied */
+        }
+    </style>
+</head>
+<body>
+    <h1>Tank Water Chart</h1>
+
+    <!-- Chart goes here -->
+    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <canvas id="tankWaterChart"></canvas>
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-container">
+        <a href="{% url 'index' %}" class="home_button">Home</a>
+        <a href="{% url 'refill_tank' %}" class="refill-button">Refill Tank</a>
+    </div>
+
+    <script>
+        // Data passed from Django
+        const chartData = {
+            labels: {{ chart_data.labels|safe }},
+            values: {{ chart_data.values|safe }}
+        };
+
+        // Create chart
+        const ctx = document.getElementById('tankWaterChart').getContext('2d');
+        const tankWaterChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels, // Time labels
+                datasets: [
+                    {
+                        label: 'Tank Water Level (grams)',
+                        data: chartData.values, // Remaining water
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        fill: true
+                    },
+                    {
+                        label: 'Threshold (500 grams)',
+                        data: new Array(chartData.labels.length).fill(500), // Constant threshold line
+                        borderColor: 'rgba(255, 0, 0, 0.7)', // Red line
+                        borderWidth: 2,
+                        borderDash: [10, 5], // Dashed line
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Tank Water Level (grams)'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

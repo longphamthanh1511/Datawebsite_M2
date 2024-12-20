@@ -1,0 +1,262 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Grid layout for 6 charts */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0; /* Add some space above and below the table */
+            font-size: 16px; /* Slightly larger text for readability */
+            background-color: #fff; /* White background for the table */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            border-radius: 8px; /* Rounded corners */
+            overflow: hidden; /* Prevents overflow of rounded corners */
+        }
+        
+        th, td {
+            padding: 10px 15px; /* Added more padding for comfort */
+            text-align: left;
+            border: 1px solid #ccc; /* Light gray border for a clean look */
+        }
+        
+        th {
+            background-color: #4CAF50; /* Green background for table header */
+            color: white; /* White text for header */
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2; /* Subtle gray for even rows */
+        }
+        
+        tr:hover {
+            background-color: #e9f7e9; /* Light green on hover for emphasis */
+        }
+
+        .chart-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns */
+            grid-template-rows: 1fr 1fr 1fr; /* Three rows */
+            gap: 20px; /* Space between the charts */
+            width: 90vw;
+            height: 90vh;
+            margin: 0 auto;
+        }
+        
+        .chart {
+            border: 2px solid #4CAF50; /* Green border for contrast */
+            padding: 10px;
+            background: #ffffff; /* White background for clarity */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            border-radius: 8px; /* Rounded corners for a polished look */
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        h1 {
+            text-align: center;
+        }
+        h2 {
+            text-align: right;
+        }
+
+        body {
+            background-image: url("{% static 'images/background.jpg' %}");
+            background-size: cover; /* Ensures the image covers the entire page */
+            background-repeat: no-repeat; /* Prevents tiling */
+            background-attachment: fixed; /* Keeps the background fixed during scrolling */
+            background-position: center; /* Centers the image */
+            color: #040000d1; /* Optional: Makes text white for better contrast */
+        }
+    </style>
+</head>
+<body>
+    {% if latest_pic %}
+    <h1>Latest Uploaded Picture</h1>
+    <div style="text-align: center;">
+        <img src="{{ latest_pic.image.url }}" alt="Latest Picture" 
+             style="
+                 max-width: 100%; 
+                 height: auto; 
+                 display: block; 
+                 margin: 0 auto; 
+                 border: 10px solid white; /* White frame */
+                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+                 border-radius: 10px; /* Optional: Rounded corners for a softer look */
+             ">
+        <p>Uploaded at: {{ latest_pic.timestamp }}</p>
+    </div>
+    {% else %}
+    <p>No pictures uploaded yet!</p>
+    {% endif %}
+
+    <h1>Latest Uploaded Datas</h1>
+    <h2>Pham Thanh Long Projects</h2>
+
+    <a href="{% url 'tank_water_chart' %}" class="refill-button">
+        <button>Tank Water</button>
+    </a>
+
+    <!-- Data Table -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Temperature (°C)</th>
+                <th>Humidity (%)</th>
+                <th>Soil Temp (°C)</th>
+                <th>Soil Humidity (%)</th>
+                <th>Soil pH</th>
+                <th>Soil EC (µS/m)</th>
+                <th>Input pH</th>
+                <th>Input EC</th>
+                <th>Drain pH</th>
+                <th>Drain EC</th>
+                <th>Plant Weight</th>
+                <th>Input Weight</th>
+                <th>Drain Weight</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in data %}
+                <tr>
+                    <td>{{ entry.time }}</td>
+                    <td>{{ entry.temperature }}</td>
+                    <td>{{ entry.humidity }}</td>
+                    <td>{{ entry.soil_temperature }}</td>
+                    <td>{{ entry.soil_humidity }}</td>
+                    <td>{{ entry.soil_pH }}</td>
+                    <td>{{ entry.soil_EC }}</td>
+                    <td>{{ entry.input_ph }}</td>
+                    <td>{{ entry.input_ec }}</td>
+                    <td>{{ entry.drain_ph }}</td>
+                    <td>{{ entry.drain_ec }}</td>
+                    <td>{{ entry.plant_weight }}</td>
+                    <td>{{ entry.input_weight }}</td>
+                    <td>{{ entry.drain_weight }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Grid layout for the charts -->
+    <div class="chart-container">
+        <!-- Temperature Chart -->
+        <div class="chart">
+            <canvas id="temperatureChart"></canvas>
+            <div class="chart-title">Temperature</div>
+        </div>
+
+        <!-- Humidity Chart -->
+        <div class="chart">
+            <canvas id="humidityChart"></canvas>
+            <div class="chart-title">Humidity</div>
+        </div>
+
+        <!-- Soil Temperature Chart -->
+        <div class="chart">
+            <canvas id="soilTemperatureChart"></canvas>
+            <div class="chart-title">Soil Temperature</div>
+        </div>
+
+        <!-- Soil Humidity Chart -->
+        <div class="chart">
+            <canvas id="soilHumidityChart"></canvas>
+            <div class="chart-title">Soil Humidity</div>
+        </div>
+
+        <!-- Input Weight Chart -->
+        <div class="chart">
+            <canvas id="inputWeightChart"></canvas>
+            <div class="chart-title">Input Weight</div>
+        </div>
+
+        <!-- Plant Weight Chart -->
+        <div class="chart">
+            <canvas id="plantWeightChart"></canvas>
+            <div class="chart-title">Plant Weight</div>
+        </div>
+
+        <!-- Drain Weight Chart -->
+        <div class="chart">
+            <canvas id="drainWeightChart"></canvas>
+            <div class="chart-title">Drain Weight</div>
+        </div>
+
+        <!-- Soil pH Chart -->
+        <div class="chart">
+            <canvas id="soilPhChart"></canvas>
+            <div class="chart-title">Soil pH</div>
+        </div>
+
+        <!-- Soil EC Chart -->
+        <div class="chart">
+            <canvas id="soilECChart"></canvas>
+            <div class="chart-title">Soil EC</div>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script>
+        const chartData = {
+            labels: {{ chart_data.labels|safe }},
+            temperature: {{ chart_data.temperature|safe }},
+            humidity: {{ chart_data.humidity|safe }},
+            soilTemperature: {{ chart_data.soil_temperature|safe }},
+            soilHumidity: {{ chart_data.soil_humidity|safe }},
+            inputWeight: {{ chart_data.input_weight|safe }},
+            plantWeight: {{ chart_data.plant_weight|safe }},
+            drainWeight: {{ chart_data.drain_weight|safe }},
+            soilPh: {{ chart_data.soil_ph|safe }},
+            soilEC: {{ chart_data.soil_ec|safe }}
+        };
+
+        const createChart = (ctx, label, data, bgColor, borderColor) => {
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor: bgColor,
+                        borderColor: borderColor,
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: 'Time' } },
+                        y: { title: { display: true, text: label }, beginAtZero: false }
+                    }
+                }
+            });
+        };
+
+        // Create charts
+        createChart(document.getElementById('temperatureChart').getContext('2d'), 'Temperature (°C)', chartData.temperature, 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)');
+        createChart(document.getElementById('humidityChart').getContext('2d'), 'Humidity (%)', chartData.humidity, 'rgba(54, 162, 235, 0.2)', 'rgba(54, 162, 235, 1)');
+        createChart(document.getElementById('soilTemperatureChart').getContext('2d'), 'Soil Temperature (°C)', chartData.soilTemperature, 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)');
+        createChart(document.getElementById('soilHumidityChart').getContext('2d'), 'Soil Humidity (%)', chartData.soilHumidity, 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)');
+        createChart(document.getElementById('inputWeightChart').getContext('2d'), 'Input Weight', chartData.inputWeight, 'rgba(255, 159, 64, 0.2)', 'rgba(255, 159, 64, 1)');
+        createChart(document.getElementById('plantWeightChart').getContext('2d'), 'Plant Weight', chartData.plantWeight, 'rgba(255, 206, 86, 0.2)', 'rgba(255, 206, 86, 1)');
+        createChart(document.getElementById('drainWeightChart').getContext('2d'), 'Drain Weight', chartData.drainWeight, 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)');
+        createChart(document.getElementById('soilPhChart').getContext('2d'), 'Soil pH', chartData.soilPh, 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)');
+        createChart(document.getElementById('soilECChart').getContext('2d'), 'Soil EC (µS/m)', chartData.soilEC, 'rgba(54, 162, 235, 0.2)', 'rgba(54, 162, 235, 1)');
+    </script>
+</body>
+</html>
