@@ -1,0 +1,78 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drain Tank Chart</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Drain Tank Water Chart</h1>
+
+    <!-- Chart goes here -->
+    <canvas id="drainWaterChart" width="400" height="200"></canvas>
+
+    <!-- Alert for threshold -->
+    <div id="thresholdAlert" style="display: none;">
+        <h3 style="color: red;">Warning: Drain Tank is full, please empty it!</h3>
+    </div>
+
+    <!-- Button to go to the drain page -->
+    <a href="{% url 'drain_tank' %}" class="drain-button">
+        <button>Drain Water Tank</button>
+    </a>
+
+    <script>
+        // Your chart data from Django view
+        const chartData = {
+            labels: {{ chart_data.labels|safe }},
+            values: {{ chart_data.values|safe }},
+            threshold: {{ chart_data.threshold|safe }}
+        };
+
+        // Create the chart
+        const ctx = document.getElementById('drainWaterChart').getContext('2d');
+        const drainWaterChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Drain Tank Water (grams)',
+                    data: chartData.values,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Drain Tank Weight (grams)'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Check if the tank weight has exceeded the threshold
+        const maxWeight = Math.max(...chartData.values);
+        if (maxWeight >= chartData.threshold) {
+            document.getElementById('thresholdAlert').style.display = 'block';
+        }
+    </script>
+
+</body>
+</html>

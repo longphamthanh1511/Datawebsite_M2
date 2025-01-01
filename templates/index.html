@@ -109,24 +109,29 @@
         <button>Tank Water</button>
     </a>
 
-    <!-- Data Table -->
+    <a href="{% url 'drain_tank_chart' %}" class="refill-button">
+        <button>Drain Tank</button>
+    </a>
+
+    <!-- Data Table 1 -->
     <table border="1">
         <thead>
             <tr>
                 <th>Time</th>
                 <th>Temperature (°C)</th>
                 <th>Humidity (%)</th>
-                <th>Soil Temp (°C)</th>
-                <th>Soil Humidity (%)</th>
-                <th>Soil pH</th>
-                <th>Soil EC (µS/m)</th>
-                <th>Input pH</th>
-                <th>Input EC</th>
-                <th>Drain pH</th>
-                <th>Drain EC</th>
-                <th>Plant Weight</th>
-                <th>Input Weight</th>
-                <th>Drain Weight</th>
+                <th>Sun (W/m2)</th>
+                <th>Soil Temp 1(°C)</th>
+                <th>Soil Humidity 1(%)</th>
+                <th>Soil pH 1</th>
+                <th>Soil EC 1(µS/m)</th>
+                <th>Input pH 1</th>
+                <th>Input EC 1</th>
+                <th>Drain pH 1</th>
+                <th>Drain EC 1</th>
+                <th>Plant Weight 1</th>
+                <th>Input Weight 1</th>
+                <th>Drain Weight 1</th>
             </tr>
         </thead>
         <tbody>
@@ -135,6 +140,7 @@
                     <td>{{ entry.time }}</td>
                     <td>{{ entry.temperature }}</td>
                     <td>{{ entry.humidity }}</td>
+                    <td>{{ entry.sun }}</td>
                     <td>{{ entry.soil_temperature }}</td>
                     <td>{{ entry.soil_humidity }}</td>
                     <td>{{ entry.soil_pH }}</td>
@@ -146,6 +152,50 @@
                     <td>{{ entry.plant_weight }}</td>
                     <td>{{ entry.input_weight }}</td>
                     <td>{{ entry.drain_weight }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Data Table 2 -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Temperature (°C)</th>
+                <th>Humidity (%)</th>
+                <th>Sun (W/m2)</th>
+                <th>Soil Temp 2(°C)</th>
+                <th>Soil Humidity 2(%)</th>
+                <th>Soil pH 2</th>
+                <th>Soil EC 2(µS/m)</th>
+                <th>Input pH 2</th>
+                <th>Input EC 2</th>
+                <th>Drain pH 2</th>
+                <th>Drain EC 2</th>
+                <th>Plant Weight 2</th>
+                <th>Input Weight 2</th>
+                <th>Drain Weight 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in data %}
+                <tr>
+                    <td>{{ entry.time }}</td>
+                    <td>{{ entry.temperature }}</td>
+                    <td>{{ entry.humidity }}</td>
+                    <td>{{ entry.sun }}</td>
+                    <td>{{ entry.soil_temperature2 }}</td>
+                    <td>{{ entry.soil_humidity2 }}</td>
+                    <td>{{ entry.soil_pH2 }}</td>
+                    <td>{{ entry.soil_EC2 }}</td>
+                    <td>{{ entry.input_ph2 }}</td>
+                    <td>{{ entry.input_ec2 }}</td>
+                    <td>{{ entry.drain_ph2 }}</td>
+                    <td>{{ entry.drain_ec2 }}</td>
+                    <td>{{ entry.plant_weight2 }}</td>
+                    <td>{{ entry.input_weight2 }}</td>
+                    <td>{{ entry.drain_weight2 }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -163,6 +213,12 @@
         <div class="chart">
             <canvas id="humidityChart"></canvas>
             <div class="chart-title">Humidity</div>
+        </div>
+
+        <!-- Sun Chart -->
+        <div class="chart">
+            <canvas id="sunChart"></canvas>
+            <div class="chart-title">Sun</div>
         </div>
 
         <!-- Soil Temperature Chart -->
@@ -206,6 +262,49 @@
             <canvas id="soilECChart"></canvas>
             <div class="chart-title">Soil EC</div>
         </div>
+
+
+        <!-- Soil Temperature 2 Chart  -->
+        <div class="chart">
+            <canvas id="soilTemperature2Chart"></canvas>
+            <div class="chart-title">Soil Temperature 2</div>
+        </div>
+
+        <!-- Soil Humidity 2 Chart -->
+        <div class="chart">
+            <canvas id="soilHumidity2Chart"></canvas>
+            <div class="chart-title">Soil Humidity 2</div>
+        </div>
+
+        <!-- Input Weight 2 Chart -->
+        <div class="chart">
+            <canvas id="inputWeight2Chart"></canvas>
+            <div class="chart-title">Input Weight 2</div>
+        </div>
+
+        <!-- Plant Weight 2 Chart -->
+        <div class="chart">
+            <canvas id="plantWeight2Chart"></canvas>
+            <div class="chart-title">Plant Weight 2</div>
+        </div>
+
+        <!-- Drain Weight 2 Chart -->
+        <div class="chart">
+            <canvas id="drainWeight2Chart"></canvas>
+            <div class="chart-title">Drain Weight 2</div>
+        </div>
+
+        <!-- Soil pH 2 Chart -->
+        <div class="chart">
+            <canvas id="soilPh2Chart"></canvas>
+            <div class="chart-title">Soil pH 2</div>
+        </div>
+
+        <!-- Soil EC 2 Chart -->
+        <div class="chart">
+            <canvas id="soilEC2Chart"></canvas>
+            <div class="chart-title">Soil EC 2</div>
+        </div>
     </div>
 
     <!-- Chart.js -->
@@ -214,13 +313,23 @@
             labels: {{ chart_data.labels|safe }},
             temperature: {{ chart_data.temperature|safe }},
             humidity: {{ chart_data.humidity|safe }},
+            sun: {{ chart_data.sun|safe }},
+
             soilTemperature: {{ chart_data.soil_temperature|safe }},
             soilHumidity: {{ chart_data.soil_humidity|safe }},
             inputWeight: {{ chart_data.input_weight|safe }},
             plantWeight: {{ chart_data.plant_weight|safe }},
             drainWeight: {{ chart_data.drain_weight|safe }},
             soilPh: {{ chart_data.soil_ph|safe }},
-            soilEC: {{ chart_data.soil_ec|safe }}
+            soilEC: {{ chart_data.soil_ec|safe }},
+
+            soilTemperature2: {{ chart_data.soil_temperature2|safe }},
+            soilHumidity2: {{ chart_data.soil_humidity2|safe }},
+            inputWeight2: {{ chart_data.input_weight2|safe }},
+            plantWeight2: {{ chart_data.plant_weight2|safe }},
+            drainWeight2: {{ chart_data.drain_weight2|safe }},
+            soilPh2: {{ chart_data.soil_ph2|safe }},
+            soilEC2: {{ chart_data.soil_ec2|safe }},
         };
 
         const createChart = (ctx, label, data, bgColor, borderColor) => {
@@ -250,6 +359,8 @@
         // Create charts
         createChart(document.getElementById('temperatureChart').getContext('2d'), 'Temperature (°C)', chartData.temperature, 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)');
         createChart(document.getElementById('humidityChart').getContext('2d'), 'Humidity (%)', chartData.humidity, 'rgba(54, 162, 235, 0.2)', 'rgba(54, 162, 235, 1)');
+        createChart(document.getElementById('sunChart').getContext('2d'), 'Sun (W/m2)', chartData.sun, 'rgba(15, 11, 235, 0.2)', 'rgba(54, 162, 235, 1)');
+
         createChart(document.getElementById('soilTemperatureChart').getContext('2d'), 'Soil Temperature (°C)', chartData.soilTemperature, 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)');
         createChart(document.getElementById('soilHumidityChart').getContext('2d'), 'Soil Humidity (%)', chartData.soilHumidity, 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)');
         createChart(document.getElementById('inputWeightChart').getContext('2d'), 'Input Weight', chartData.inputWeight, 'rgba(255, 159, 64, 0.2)', 'rgba(255, 159, 64, 1)');
@@ -257,6 +368,14 @@
         createChart(document.getElementById('drainWeightChart').getContext('2d'), 'Drain Weight', chartData.drainWeight, 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)');
         createChart(document.getElementById('soilPhChart').getContext('2d'), 'Soil pH', chartData.soilPh, 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)');
         createChart(document.getElementById('soilECChart').getContext('2d'), 'Soil EC (µS/m)', chartData.soilEC, 'rgba(54, 162, 235, 0.2)', 'rgba(54, 162, 235, 1)');
+
+        createChart(document.getElementById('soilTemperature2Chart').getContext('2d'), 'Soil Temperature (°C)', chartData.soilTemperature2, 'rgba(255, 99, 132, 0.2)', 'rgba(255, 99, 132, 1)');
+        createChart(document.getElementById('soilHumidity2Chart').getContext('2d'), 'Soil Humidity (%)', chartData.soilHumidity2, 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)');
+        createChart(document.getElementById('inputWeight2Chart').getContext('2d'), 'Input Weight', chartData.inputWeight2, 'rgba(255, 159, 64, 0.2)', 'rgba(255, 159, 64, 1)');
+        createChart(document.getElementById('plantWeight2Chart').getContext('2d'), 'Plant Weight', chartData.plantWeight2, 'rgba(255, 206, 86, 0.2)', 'rgba(255, 206, 86, 1)');
+        createChart(document.getElementById('drainWeight2Chart').getContext('2d'), 'Drain Weight', chartData.drainWeight2, 'rgba(75, 192, 192, 0.2)', 'rgba(75, 192, 192, 1)');
+        createChart(document.getElementById('soilPh2Chart').getContext('2d'), 'Soil pH', chartData.soilPh2, 'rgba(153, 102, 255, 0.2)', 'rgba(153, 102, 255, 1)');
+        createChart(document.getElementById('soilEC2Chart').getContext('2d'), 'Soil EC (µS/m)', chartData.soilEC2, 'rgba(54, 162, 235, 0.2)', 'rgba(54, 162, 235, 1)');
     </script>
 </body>
 </html>
